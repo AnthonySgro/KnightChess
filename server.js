@@ -2,13 +2,19 @@ const express = require("express");
 const app = express();
 
 //html
-const chessPage = require('./public/html/chessPage');
+const homepage = require('./public/js_exports_html/homepage');
+const chessPage = require('./public/js_exports_html/chessPage');
 
 const morgan = require("morgan");
 app.use(morgan('dev'));
 app.use(express.static('public'));
 
+
 app.get("/", (req, res) => {
+  res.send(homepage());
+})
+
+app.get("/play", (req, res) => {
     res.send(chessPage());
 });
 
