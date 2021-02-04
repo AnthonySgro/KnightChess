@@ -1,16 +1,24 @@
 const express = require("express");
 const app = express();
-const morgan = require("morgan");
 
+//html
+const chessPage = require('./public/html/chessPage');
+
+const morgan = require("morgan");
 app.use(morgan('dev'));
 app.use(express.static('public'));
 
 app.get("/", (req, res) => {
-    res.sendFile('./public/index.html');
+    res.send(chessPage());
 });
 
+app.get("*", (req, res) => {
+  next(new Error("sgro"));
+})
+
 app.use((err, req, res, next) => {
-    res.send({ data: err.toString() });
+    //this middleware is a errorHandler middleware
+    res.send('error 2 baby', 404);
 })
 
 const PORT = 42069;

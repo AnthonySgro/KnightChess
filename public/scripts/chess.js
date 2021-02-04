@@ -206,7 +206,7 @@ class Piece {
 class Pawn extends Piece {
     constructor(color, chessTile) {
         super(color, chessTile)
-        this.imageFile = `images/${this.color}-pawn.png`;
+        this.imageFile = `../images/${this.color}-pawn.png`;
         this.moveTwoAvailable = true;
         this.queened = false;
         this.justMovedTwo = false;
@@ -370,7 +370,7 @@ class Pawn extends Piece {
 class Knight extends Piece {
     constructor(color, chessTile) {
         super(color, chessTile)
-        this.imageFile = `images/${this.color}-knight.png`;
+        this.imageFile = `../images/${this.color}-knight.png`;
         this.name = 'Knight'
         this.attackingSquares = [];
     }
@@ -458,7 +458,7 @@ class Knight extends Piece {
 class Bishop extends Piece {
     constructor(color, chessTile) {
         super(color, chessTile)
-        this.imageFile = `images/${this.color}-bishop.png`;
+        this.imageFile = `../images/${this.color}-bishop.png`;
         this.name = 'Bishop';
         this.attackingSquares = [];
     }
@@ -639,7 +639,7 @@ class Bishop extends Piece {
 class Rook extends Piece {
     constructor(color, chessTile) {
         super(color, chessTile)
-        this.imageFile = `images/${this.color}-rook.png`;
+        this.imageFile = `../images/${this.color}-rook.png`;
         this.name = 'Rook';
         this.attackingSquares = [];
     }
@@ -815,7 +815,7 @@ class Rook extends Piece {
 class Queen extends Piece {
     constructor(color, chessTile) {
         super(color, chessTile)
-        this.imageFile = `images/${this.color}-queen.png`;
+        this.imageFile = `../images/${this.color}-queen.png`;
         this.name = 'Queen';
         this.attackingSquares = [];
     }
@@ -1121,7 +1121,7 @@ class Queen extends Piece {
 class King extends Piece {
     constructor(color, chessTile) {
         super(color, chessTile)
-        this.imageFile = `images/${this.color}-king.png`;
+        this.imageFile = `../images/${this.color}-king.png`;
         this.shortCastlingAvailable = true;
         this.longCastlingAvailable = true;
         this.inCheck = false;
@@ -1264,7 +1264,7 @@ class chessTile {
 
         //updates this.image and this.piecePresent to check if a piece is here, displays piece too
         this.image = document.getElementById(`${this.name}-img`).src;
-        if (this.image === 'file:///Users/anthony/programming/sgroChess/images/placeholder.png') {
+        if (this.image === 'file:///Users/anthony/programming/sgroChess/public/images/placeholder.png') {
             this.piecePresent = false;
         } else {
             this.piecePresent = true;
