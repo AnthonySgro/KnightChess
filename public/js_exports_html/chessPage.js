@@ -5,7 +5,7 @@ module.exports = chessPage = () => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sgro Chess</title>
+        <title>Play Game</title>
         <link rel="stylesheet" href="../stylesheets/gamepage.css">
         <link href="https://fonts.googleapis.com/css?family=Poppins:500" rel="stylesheet">
         <script defer src='../scripts/chess.js'></script>

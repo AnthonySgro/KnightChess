@@ -4,6 +4,8 @@ const app = express();
 //html
 const homepage = require('./public/js_exports_html/homepage');
 const chessPage = require('./public/js_exports_html/chessPage');
+const errorPage = require('./public/js_exports_html/error');
+const signUp = require('./public/js_exports_html/signUp');
 
 const morgan = require("morgan");
 app.use(morgan('dev'));
@@ -12,6 +14,14 @@ app.use(express.static('public'));
 
 app.get("/", (req, res) => {
   res.send(homepage());
+})
+
+app.get("/index.html", (req, res) => {
+  res.send(homepage());
+})
+
+app.get("/sign-up",(req, res) => {
+  res.send(signUp());
 })
 
 app.get("/play", (req, res) => {
@@ -24,7 +34,7 @@ app.get("*", (req, res) => {
 
 app.use((err, req, res, next) => {
     //this middleware is a errorHandler middleware
-    res.send('error 2 baby', 404);
+    res.send(errorPage());
 })
 
 const PORT = 42069;
