@@ -60,6 +60,9 @@ function checkPasswordsMatch(input1, input2) {
 
 // Get field name
 function getFieldName(input) {
+    if (input.id === 'password2') {
+        return 'Password confirmation';
+    }
     return input.id.charAt(0).toUpperCase() + input.id.slice(1);
 }
 
@@ -68,7 +71,7 @@ form.addEventListener('submit', function(e) {
     e.preventDefault();
 
     checkRequired([username, email, password, confirmPassword]);
-    checkLength(username, 3, 15);
+    checkLength(username, 4, 15);
     checkLength(password, 6, 25);
     checkEmail(email);
     checkPasswordsMatch(password, confirmPassword);
