@@ -1558,9 +1558,13 @@ function displayMoves(tile) {
     highlightAttackedSquares(piece.validMoves);
 }
 
-//<-----------------------------DOM STUFF------------------------------->
+//<--------------------------------------DOM STUFF--------------------------------------------->
 
+//initializing chessgame info
 let chessboard;
+let selectingPhase = true;
+let whiteTurn = true;
+
 
 let enterInitBtn = document.getElementById('init-game');
 enterInitBtn.addEventListener('click', function() {
@@ -1573,32 +1577,9 @@ chessApp.addEventListener('click', (ev) => {
 
 })
 
-let chessTiles = document.getElementsByClassName('chess-tile');
-[...chessTiles].forEach(tile => {
-    tile.addEventListener('dragover', (ev) => {
-        ev.preventDefault();
 
-        // if (ev.target.src === 'http://localhost:8000/images/validMoveDot.png' || [...ev.target.classList].includes('capturable')) {
-        //     ev.target.classList.add('darkened');
-        // };
-
-        if ([...ev.target.classList].includes('will-highlight')) {
-            ev.target.classList.add('darkened');
-        }
-    })
-    tile.addEventListener('dragleave', (ev) => {
-        ev.preventDefault();
-        ev.target.classList.remove('darkened');
-    });
-});
-
-//init turn info
-let selectingPhase = true;
-let whiteTurn = true;
-let id;
-let tile;
-
-//if we click on the chessboard display
+//------------------------------
+//dragging events on chessboard
 let chessboardDisplay = document.getElementById('chessboard-backdrop');
 chessboardDisplay.addEventListener('dragstart', (ev) => {
     //two phases to each turn: selecting, moving
@@ -1606,13 +1587,13 @@ chessboardDisplay.addEventListener('dragstart', (ev) => {
     let target = ev.target;
 
     //gets position of click in cartesian plane notation (0,0) start, (7,7) last
-    id = convertNotation(target.id[0] + target.id[1]);
+    let id = convertNotation(target.id[0] + target.id[1]);
     
     //if it is selecting phase...
     if (selectingPhase === true) {
 
         //grab chessTile we clicked
-        tile = chessboard.board[id[0]][id[1]]
+        let tile = chessboard.board[id[0]][id[1]]
 
         //white's turn
         if (whiteTurn === true) {
@@ -1637,13 +1618,12 @@ chessboardDisplay.addEventListener('drop', (ev) => {
     ev.preventDefault()
 
     let target = ev.target;
-
-    id = convertNotation(target.id[0] + target.id[1]);
+    let successfulMove = false;
+    let id = convertNotation(target.id[0] + target.id[1]);
 
     //if moving phase...
     selectingPhase = !selectingPhase;
-    tile = chessboard.board[id[0]][id[1]];
-    console.log(tile);
+    let tile = chessboard.board[id[0]][id[1]];
 
     //if this was a valid move...
     if (piece.findValidMoves().includes(tile)) {
@@ -1653,13 +1633,60 @@ chessboardDisplay.addEventListener('drop', (ev) => {
         ev.target.classList.remove('darkened');
         whiteTurn = !whiteTurn;
         displayTurn(whiteTurn);
+        successfulMove = true;
     }
     
     //always remove visual cues even and go to 
     //selecting phase if move didn't execute
     makeAllEmptyTilesBlank()
     displayFeedback('Selecting Phase');
+
+    if (successfulMove) {
+        justMovedHighlight(tile);
+    }
 })
+
+chessboardDisplay.addEventListener('dragover', (ev) => {
+    ev.preventDefault();
+    let [...chessTileElementClasses] = ev.target.parentNode.classList;
+
+    //if we drag over a chess tile,
+    if (chessTileElementClasses.includes('chess-tile')) {
+
+        //and it is a valid move without a piece on it
+        if (chessTileElementClasses.includes('empty-moveable')) {
+            ev.target.src = 'images/placeholder.png';
+            ev.target.classList.add('darkened');
+
+        //if it is a valid move and it has a piece on it
+        } else if (chessTileElementClasses.includes('nonempty-moveable')) {
+            ev.target.parentNode.style.borderRadius = "0px";
+            ev.target.classList.add('darkened');
+        }
+    }
+})
+
+chessboardDisplay.addEventListener('dragleave', (ev) => {
+    ev.preventDefault();
+    let [...chessTileElementClasses] = ev.target.parentNode.classList;
+
+    //if we leave a chess tile
+    if (chessTileElementClasses.includes('chess-tile')) {
+        
+        //and it was from a tile we could move to that didn't have a piece on it
+        if (chessTileElementClasses.includes('empty-moveable')) {
+            ev.target.src = 'images/validMoveDot.png';
+            ev.target.classList.remove('darkened');
+
+        //and it was from a tile we could move to that had a piece on it
+        } else if (chessTileElementClasses.includes('nonempty-moveable')) {
+            ev.target.parentNode.style.borderRadius = "25px";
+            ev.target.classList.remove('darkened');
+        }
+    }  
+});
+
+//------------------------------
 
 function displayFeedback(str) {
     document.getElementById('phase-information').innerHTML = str;
@@ -1678,11 +1705,12 @@ function highlightAttackedSquares(arrOfMoves) {
     arrOfMoves.forEach(validMove => {
         if (validMove.piece === null) {
             document.getElementById(`${validMove.name}-img`).src =  'images/validMoveDot.png';
+            document.getElementById(validMove.name).classList.add('empty-moveable');
         } else {
             document.getElementById(validMove.name).style.borderRadius = "25px";
+            document.getElementById(validMove.name).classList.add('nonempty-moveable');
         }
-        document.getElementById(validMove.name).classList.add('will-highlight');
-        console.log(document.getElementById(validMove.name).classList);
+        
     })
 }
 
@@ -1699,7 +1727,9 @@ function makeAllEmptyTilesBlank() {
 
             document.getElementById(chessboard.board[col][row].name).style.borderRadius = "0px";
             document.getElementById(chessboard.board[col][row].name).classList.remove('darkened');
-            document.getElementById(chessboard.board[col][row].name).classList.remove('will-highlight');
+            document.getElementById(chessboard.board[col][row].name).classList.remove('empty-moveable');
+            document.getElementById(chessboard.board[col][row].name).classList.remove('nonempty-moveable');
+
 
 
             if (chessboard.board[col][row].piece === null) {
@@ -1708,4 +1738,8 @@ function makeAllEmptyTilesBlank() {
             }
         }
     }
+}
+
+function justMovedHighlight(tile) {
+    console.log(tile.numCoord, tile.row);
 }
