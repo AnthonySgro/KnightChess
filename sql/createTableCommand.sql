@@ -1,7 +1,7 @@
-DROP TABLE IF EXISTS knight_chess_db
-create table knight_chess_db (
+-- DROP TABLE IF EXISTS knight_chess_db
+CREATE TABLE knight_chess_db (
 	id BIGSERIAL NOT NULL PRIMARY KEY,
-    email VARCHAR(50),
-	username VARCHAR(50),
-	password_hash VARCHAR(150)
+	un VARCHAR(50) NOT NULL,
+	pwHash VARCHAR(50) NOT NULL,
+	email VARCHAR(100) NOT NULL
 );

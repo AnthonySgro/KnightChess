@@ -365,6 +365,10 @@ class Pawn extends Piece {
                 }
             }
     }
+
+    removeIllegalMoves(arr) {
+        return arr;
+    }
 }
 
 class Knight extends Piece {
@@ -1303,8 +1307,7 @@ class chessTile {
             }    
         }
     }
-}
-    
+} 
 
 class Chessboard {
     constructor() {
@@ -1570,23 +1573,40 @@ chessApp.addEventListener('click', (ev) => {
 
 })
 
+let chessTiles = document.getElementsByClassName('chess-tile');
+[...chessTiles].forEach(tile => {
+    tile.addEventListener('dragover', (ev) => {
+        ev.preventDefault();
+
+        // if (ev.target.src === 'http://localhost:8000/images/validMoveDot.png' || [...ev.target.classList].includes('capturable')) {
+        //     ev.target.classList.add('darkened');
+        // };
+
+        if ([...ev.target.classList].includes('will-highlight')) {
+            ev.target.classList.add('darkened');
+        }
+    })
+    tile.addEventListener('dragleave', (ev) => {
+        ev.preventDefault();
+        ev.target.classList.remove('darkened');
+    });
+});
 
 //init turn info
 let selectingPhase = true;
 let whiteTurn = true;
+let id;
+let tile;
 
 //if we click on the chessboard display
 let chessboardDisplay = document.getElementById('chessboard-backdrop');
-chessboardDisplay.addEventListener('click', (ev) => {
-
+chessboardDisplay.addEventListener('dragstart', (ev) => {
     //two phases to each turn: selecting, moving
     //selecting phase = 'false', moving phase 'true'
     let target = ev.target;
-    let tile;
-
 
     //gets position of click in cartesian plane notation (0,0) start, (7,7) last
-    let id = convertNotation(target.id[0] + target.id[1]);
+    id = convertNotation(target.id[0] + target.id[1]);
     
     //if it is selecting phase...
     if (selectingPhase === true) {
@@ -1610,26 +1630,35 @@ chessboardDisplay.addEventListener('click', (ev) => {
                 selectingPhase = !selectingPhase;
             }
         }
+    }
+})
+
+chessboardDisplay.addEventListener('drop', (ev) => {
+    ev.preventDefault()
+
+    let target = ev.target;
+
+    id = convertNotation(target.id[0] + target.id[1]);
 
     //if moving phase...
-    } else {
-        selectingPhase = !selectingPhase;
-        tile = chessboard.board[id[0]][id[1]];
+    selectingPhase = !selectingPhase;
+    tile = chessboard.board[id[0]][id[1]];
+    console.log(tile);
 
-        //if this was a valid move...
-        if (piece.findValidMoves().includes(tile)) {
+    //if this was a valid move...
+    if (piece.findValidMoves().includes(tile)) {
 
-            //move piece and change turn!
-            piece.movePiece(chessboard.board[id[0]][id[1]]);
-            whiteTurn = !whiteTurn;
-            displayTurn(whiteTurn);
-        }
-        
-        //always remove visual cues even and go to 
-        //selecting phase if move didn't execute
-        makeAllEmptyTilesBlank()
-        displayFeedback('Selecting Phase');
+        //move piece and change turn!
+        piece.movePiece(chessboard.board[id[0]][id[1]]);
+        ev.target.classList.remove('darkened');
+        whiteTurn = !whiteTurn;
+        displayTurn(whiteTurn);
     }
+    
+    //always remove visual cues even and go to 
+    //selecting phase if move didn't execute
+    makeAllEmptyTilesBlank()
+    displayFeedback('Selecting Phase');
 })
 
 function displayFeedback(str) {
@@ -1651,8 +1680,9 @@ function highlightAttackedSquares(arrOfMoves) {
             document.getElementById(`${validMove.name}-img`).src =  'images/validMoveDot.png';
         } else {
             document.getElementById(validMove.name).style.borderRadius = "25px";
-            //document.getElementById(validMove.name).style.backgroundColor = "red";
         }
+        document.getElementById(validMove.name).classList.add('will-highlight');
+        console.log(document.getElementById(validMove.name).classList);
     })
 }
 
@@ -1668,6 +1698,9 @@ function makeAllEmptyTilesBlank() {
             }
 
             document.getElementById(chessboard.board[col][row].name).style.borderRadius = "0px";
+            document.getElementById(chessboard.board[col][row].name).classList.remove('darkened');
+            document.getElementById(chessboard.board[col][row].name).classList.remove('will-highlight');
+
 
             if (chessboard.board[col][row].piece === null) {
                 document.getElementById(`${chessboard.board[col][row].name}-img`).src =  'images/placeholder.png';

@@ -184,3 +184,8 @@ img {
 .chessboard td:active, .chessboard th:active  {
     filter: brightness(35%);
 }
+
+.darkened {
+    background-color: rgba(0, 0, 0, 0.6);
+
+}
