@@ -187,5 +187,8 @@ img {
 
 .darkened {
     background-color: rgba(0, 0, 0, 0.6);
+}
 
+.pre-start {
+    background-color: black;
 }

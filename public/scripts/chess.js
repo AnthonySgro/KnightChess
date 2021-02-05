@@ -15,7 +15,8 @@ class Piece {
 
     //moves!
     movePiece(chessTile) {
-        
+        let enpassantHappened = false;
+
         //eliminate enPassant vulnerabilities
         if (this.color === 'white') {
             chessboard.whitePieces.forEach(piece => {
@@ -57,6 +58,7 @@ class Piece {
                             chessboard.whitePieces.splice(chessboard.whitePieces.indexOf(chessTile.adjacentTile('down').piece), 1);
                             chessTile.adjacentTile('down').piece = null;
                             chessTile.adjacentTile('down').piecePresent = false;
+                            enpassantHappened = true;
                             chessboard.updatePieces();
                         }
                     }
@@ -80,6 +82,7 @@ class Piece {
                                     chessTile.adjacentTile('up').piece = null;
                                     chessTile.adjacentTile('up').piecePresent = false;
                                     chessboard.updatePieces();
+                                    enpassantHappened = true;
                                 }
                             }
                 }
@@ -123,21 +126,27 @@ class Piece {
                     //chessboard.whitePieces.splice(chessboard.blackPieces.indexOf(this), 1);
                 }
 
-                console.log(chessboard.whitePieces);
                 queenedPawn.currentChessTile.piece = queenedPawn;
                 queenedPawn.currentChessTile.piecePresent = true;
                 queenedPawn.validMoves = [];
                 queenedPawn.displayPiece();
                 queenedPawn.hasMoved = true;
+                playMoveSound();
                 return;
             }
         }
 
         //check if piece is on the square you are moving it to
+        //***ALSO MANAGES SOUND*** (one other sound item for pawn promotion elsewhere)
         if (chessTile.piecePresent) {
 
             //if yes, remove
             chessboard.removePiece(chessTile.piece);
+            playCaptureSound();
+        } else if (enpassantHappened === true) {
+            playCaptureSound();
+        } else {
+            playMoveSound();
         }
 
         //--PIECE HAS NOW MOVED--//
@@ -1564,6 +1573,7 @@ function displayMoves(tile) {
 let chessboard;
 let selectingPhase = true;
 let whiteTurn = true;
+let draggingPiece = null;
 
 
 let enterInitBtn = document.getElementById('init-game');
@@ -1577,59 +1587,99 @@ chessApp.addEventListener('click', (ev) => {
 
 })
 
-
 //------------------------------
 //dragging events on chessboard
 let chessboardDisplay = document.getElementById('chessboard-backdrop');
 chessboardDisplay.addEventListener('dragstart', (ev) => {
-    //two phases to each turn: selecting, moving
-    //selecting phase = 'false', moving phase 'true'
     let target = ev.target;
 
     //gets position of click in cartesian plane notation (0,0) start, (7,7) last
     let id = convertNotation(target.id[0] + target.id[1]);
+
+    //grab chessTile we clicked
+    let tile = chessboard.board[id[0]][id[1]]
+
+    //if you grabbed a piece...
+    if (tile.piecePresent === true) {
+
+        //and it is the correct color
+        if (tile.piece.white === whiteTurn) {
+
+            //grab the piece to reference in the 'drop' event
+            draggingPiece = tile.piece;
+            console.log(draggingPiece);
+
+            //centers the dragged image to mouse
+            ev.dataTransfer.setDragImage(target, 30, 30);
+            ev.dataTransfer.setData("image/pgn", target.src);
+
     
-    //if it is selecting phase...
-    if (selectingPhase === true) {
+            //if it is selecting phase...
+            if (selectingPhase === true) {
 
-        //grab chessTile we clicked
-        let tile = chessboard.board[id[0]][id[1]]
+                //white's turn
+                if (whiteTurn === true) {
 
-        //white's turn
-        if (whiteTurn === true) {
+                    //if we selected a piece and it is the right color...
+                    if (tile.piece !== null && chessboard.whitePieces.includes(tile.piece)) {
+                    
+                        //makes original image a bit opaque and adds filter
+                        target.style.opacity = ".5";
+                        addFilterDiv(target, '#ffd166');
 
-            //if we selected a piece and it is the right color...
-            if (tile.piece !== null && chessboard.whitePieces.includes(tile.piece)) {
-                displayMoves(tile);
-                selectingPhase = !selectingPhase;
-            } 
+                        //displays moves with red circle
+                        displayMoves(tile);
 
-        //black's turn
-        } else {
-            if (tile.piece !== null && chessboard.blackPieces.includes(tile.piece)) {
-                displayMoves(tile);
-                selectingPhase = !selectingPhase;
+                        //moves to moving phase
+                        selectingPhase = !selectingPhase;
+                    } 
+
+                //black's turn
+                } else {
+                    if (tile.piece !== null && chessboard.blackPieces.includes(tile.piece)) {
+
+                        //makes original image a bit opaque
+                        target.style.opacity = ".5";
+                        addFilterDiv(target, '#ffd166');
+
+                        //displays moves with red circle
+                        displayMoves(tile);
+
+                        //moves to moving phase
+                        selectingPhase = !selectingPhase;
+                    }
+                }
             }
+        } else {
+            selectingPhase = false;
         }
     }
 })
 
 chessboardDisplay.addEventListener('drop', (ev) => {
-    ev.preventDefault()
 
+    ev.preventDefault()
     let target = ev.target;
-    let successfulMove = false;
     let id = convertNotation(target.id[0] + target.id[1]);
+    let tile = chessboard.board[id[0]][id[1]];
+
+    let successfulMove = false;
+    let correctTurn;
+
+    //we can only see if it's the correct turn if we are dragging a piece!
+    if (draggingPiece !== null) {
+        correctTurn = draggingPiece.white === whiteTurn;
+    }
+    
 
     //if moving phase...
     selectingPhase = !selectingPhase;
-    let tile = chessboard.board[id[0]][id[1]];
 
     //if this was a valid move...
-    if (piece.findValidMoves().includes(tile)) {
+    if (correctTurn && draggingPiece.findValidMoves().includes(tile)) {
 
         //move piece and change turn!
-        piece.movePiece(chessboard.board[id[0]][id[1]]);
+        draggingPiece.movePiece(chessboard.board[id[0]][id[1]]);
         ev.target.classList.remove('darkened');
         whiteTurn = !whiteTurn;
         displayTurn(whiteTurn);
@@ -1638,8 +1688,9 @@ chessboardDisplay.addEventListener('drop', (ev) => {
     
     //always remove visual cues even and go to 
     //selecting phase if move didn't execute
-    makeAllEmptyTilesBlank()
+    resetBoardStyles()
     displayFeedback('Selecting Phase');
+    draggingPiece = null;
 
     if (successfulMove) {
         justMovedHighlight(tile);
@@ -1685,8 +1736,34 @@ chessboardDisplay.addEventListener('dragleave', (ev) => {
         }
     }  
 });
-
 //------------------------------
+
+
+//sound
+function playMoveSound() {
+    let moveSound = new Audio('../sounds/Move.mp3');
+    let playMove = moveSound.play();
+    if (playMove !== undefined) {
+        playMove.then(function() {
+
+        }).catch(function(error) {
+            console.log('Failed to load move sound');
+        })
+    }
+}
+
+//sound
+function playCaptureSound() {
+    let captureSound = new Audio('../sounds/Capture.mp3');
+    let playCapture = captureSound.play();
+    if (playCapture !== undefined) {
+        playCapture.then(function() {
+
+        }).catch(function(error) {
+            console.log('Failed to load capture sound');
+        })
+    }
+}
 
 function displayFeedback(str) {
     document.getElementById('phase-information').innerHTML = str;
@@ -1714,7 +1791,7 @@ function highlightAttackedSquares(arrOfMoves) {
     })
 }
 
-function makeAllEmptyTilesBlank() {
+function resetBoardStyles() {
 
     //de-colors the board tiles
     for (let col = 0; col < 8; col++) {
@@ -1725,12 +1802,22 @@ function makeAllEmptyTilesBlank() {
                 chessboard.board[col][row].htmlElement.style.backgroundColor = "#118ab2";
             }
 
-            document.getElementById(chessboard.board[col][row].name).style.borderRadius = "0px";
-            document.getElementById(chessboard.board[col][row].name).classList.remove('darkened');
-            document.getElementById(chessboard.board[col][row].name).classList.remove('empty-moveable');
-            document.getElementById(chessboard.board[col][row].name).classList.remove('nonempty-moveable');
+            //resets tileDivs
+            let tileDivElement = document.getElementById(chessboard.board[col][row].name);
+            tileDivElement.style.borderRadius = "0px";
+            tileDivElement.classList.remove('darkened');
+            tileDivElement.classList.remove('empty-moveable');
+            tileDivElement.classList.remove('nonempty-moveable');
 
+            //if there's a wrapper, get rid of it
+            if (tileDivElement.children[0].id === `${tileDivElement.id + '-wrapper'}`) {
+                let imgElement = tileDivElement.children[0].children[0];
+                tileDivElement.replaceChild(imgElement, tileDivElement.children[0]);
+            }
 
+            tileDivElement.children[0].style.opacity = "1";
+
+            
 
             if (chessboard.board[col][row].piece === null) {
                 document.getElementById(`${chessboard.board[col][row].name}-img`).src =  'images/placeholder.png';
@@ -1741,5 +1828,16 @@ function makeAllEmptyTilesBlank() {
 }
 
 function justMovedHighlight(tile) {
-    console.log(tile.numCoord, tile.row);
+    //console.log(tile.numCoord, tile.row);
+}
+
+function addFilterDiv(imgElement, color) {
+    let parent = imgElement.parentNode;
+    let wrapper = document.createElement('div');
+    wrapper.id = `${parent.id + '-wrapper'}`;
+    wrapper.classList = parent.classList;
+    parent.replaceChild(wrapper, imgElement);
+    wrapper.appendChild(imgElement);
+    wrapper.style.backgroundColor = `${color}`;
+    wrapper.style.opacity = '.4';
 }
