@@ -1625,7 +1625,7 @@ chessboardDisplay.addEventListener('dragstart', (ev) => {
                     
                         //makes original image a bit opaque and adds filter
                         target.style.opacity = ".5";
-                        addFilterDiv(target, '#ffd166');
+                        addFilterDiv(target, '#997d3d');
 
                         //displays moves with red circle
                         displayMoves(tile);
@@ -1640,7 +1640,7 @@ chessboardDisplay.addEventListener('dragstart', (ev) => {
 
                         //makes original image a bit opaque
                         target.style.opacity = ".5";
-                        addFilterDiv(target, '#ffd166');
+                        addFilterDiv(target, '#ffd166', true);
 
                         //displays moves with red circle
                         displayMoves(tile);
@@ -1685,7 +1685,7 @@ chessboardDisplay.addEventListener('drop', (ev) => {
         displayTurn(whiteTurn);
         successfulMove = true;
     }
-    
+
     //always remove visual cues even and go to 
     //selecting phase if move didn't execute
     resetBoardStyles()
@@ -1693,7 +1693,8 @@ chessboardDisplay.addEventListener('drop', (ev) => {
     draggingPiece = null;
 
     if (successfulMove) {
-        justMovedHighlight(tile);
+        //target.style.opacity = ".5";
+        //addFilterDiv(target, '#ffd166', false);
     }
 })
 
@@ -1738,6 +1739,18 @@ chessboardDisplay.addEventListener('dragleave', (ev) => {
 });
 //------------------------------
 
+//clicking event
+chessboardDisplay.addEventListener('click', (ev) => {
+    let target = ev.target;
+
+    //gets position of click in cartesian plane notation (0,0) start, (7,7) last
+    let id = convertNotation(target.id[0] + target.id[1]);
+
+    //grab chessTile we clicked
+    let tile = chessboard.board[id[0]][id[1]];
+
+    
+});
 
 //sound
 function playMoveSound() {
@@ -1831,7 +1844,7 @@ function justMovedHighlight(tile) {
     //console.log(tile.numCoord, tile.row);
 }
 
-function addFilterDiv(imgElement, color) {
+function addFilterDiv(imgElement, color, bool) {
     let parent = imgElement.parentNode;
     let wrapper = document.createElement('div');
     wrapper.id = `${parent.id + '-wrapper'}`;
@@ -1839,5 +1852,7 @@ function addFilterDiv(imgElement, color) {
     parent.replaceChild(wrapper, imgElement);
     wrapper.appendChild(imgElement);
     wrapper.style.backgroundColor = `${color}`;
-    wrapper.style.opacity = '.4';
+    if (bool) {
+        wrapper.style.opacity = '.4';
+    }
 }
