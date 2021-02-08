@@ -1,5 +1,7 @@
+const html = require("html-template-tag");
+
 module.exports = homepage = () => {
-    const html = `
+    const htmlExport = html`
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -20,7 +22,7 @@ module.exports = homepage = () => {
                             <a class="nav-link" href="/sign-up">Sign Up</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/features">Features</a>
+                            <a class="nav-link" href="/profile">Profile</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/stats">Stats</a>
@@ -62,5 +64,5 @@ module.exports = homepage = () => {
     </html>
 `
 
-return html;
+return htmlExport;
 }

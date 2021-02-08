@@ -1699,6 +1699,7 @@ chessboardDisplay.addEventListener('drop', (ev) => {
 })
 
 chessboardDisplay.addEventListener('dragover', (ev) => {
+
     ev.preventDefault();
     let [...chessTileElementClasses] = ev.target.parentNode.classList;
 
@@ -1749,7 +1750,7 @@ chessboardDisplay.addEventListener('click', (ev) => {
     //grab chessTile we clicked
     let tile = chessboard.board[id[0]][id[1]];
 
-    
+
 });
 
 //sound

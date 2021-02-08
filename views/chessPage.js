@@ -1,5 +1,7 @@
+const html = require("html-template-tag");
+
 module.exports = chessPage = () => {
-    const html = `
+    const htmlExport = html`
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -9,7 +11,7 @@ module.exports = chessPage = () => {
         <link rel="stylesheet" href="../stylesheets/gamepage.css">
         <link href="https://fonts.googleapis.com/css?family=Poppins:500" rel="stylesheet">
         <script defer src='../scripts/chess.js'></script>
-    
+
     </head>
     <body>
         <div id="chess-app">
@@ -240,5 +242,5 @@ module.exports = chessPage = () => {
     </html>
 `
 
-return html;
+return htmlExport;
 }
