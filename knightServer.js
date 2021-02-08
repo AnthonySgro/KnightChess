@@ -8,6 +8,7 @@ const homepage = require('./views/homepage');
 const chessPage = require('./views/chessPage');
 const errorPage = require('./views/error');
 const signUp = require('./views/signUp');
+const profile = require('./views/profile');
 
 //middleware
 const morgan = require("morgan");
@@ -23,8 +24,21 @@ app.get("/index.html", (req, res) => {
   res.send(homepage());
 })
 
-app.get("/sign-up",(req, res) => {
+app.get("/sign-up", (req, res) => {
   res.send(signUp());
+})
+
+app.get("/profile/:id", async (req, res, next) => {
+  try {
+    const data = await client.query(`
+      SELECT * FROM knight_chess_users;
+    `)
+    console.log('hi');
+
+    const profiles = data.rows;
+    res.send(profile(profiles[req.params.id - 1]));
+  } catch (error) {next(error)}
+  
 })
 
 app.get("/play", (req, res) => {
@@ -32,11 +46,11 @@ app.get("/play", (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  next(new Error("sgro"));
+  next(new Error("error"));
 })
 
+//this middleware is a errorHandler middleware
 app.use((err, req, res, next) => {
-    //this middleware is a errorHandler middleware
     res.send(errorPage());
 })
 
